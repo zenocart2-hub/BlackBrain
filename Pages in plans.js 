@@ -1,0 +1,145 @@
+import React, { useEffect, useState } from "react";
+import {
+  getPlans,
+  createPaymentOrder,
+  verifyPayment,
+  getSubscriptionStatus
+} from "../api";
+
+const Plans = () => {
+  const [plans, setPlans] = useState([]);
+  const [currentPlan, setCurrentPlan] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // -------------------------
+  // LOAD PLANS + STATUS
+  // -------------------------
+  const loadData = async () => {
+    try {
+      const plansRes = await getPlans();
+      setPlans(plansRes.data.plans || []);
+
+      const statusRes = await getSubscriptionStatus();
+      setCurrentPlan(statusRes.data.plan);
+    } catch (err) {
+      setError("Failed to load plans");
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // -------------------------
+  // BUY PLAN
+  // -------------------------
+  const buyPlan = async (planCode) => {
+    setError("");
+    setLoading(true);
+
+    try {
+      // 1. Create Razorpay Order
+      const orderRes = await createPaymentOrder(planCode);
+
+      const {
+        order_id,
+        amount,
+        currency,
+        razorpay_key
+      } = orderRes.data;
+
+      // 2. Open Razorpay Checkout
+      const options = {
+        key: razorpay_key,
+        amount: amount,
+        currency: currency,
+        name: "BlackBrain",
+        description: "Subscription Payment",
+        order_id: order_id,
+        handler: async function (response) {
+          try {
+            // 3. Verify payment
+            await verifyPayment({
+              plan_code: planCode,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature
+            });
+
+            alert("Payment successful! Plan activated.");
+            loadData();
+          } catch (err) {
+            setError("Payment verification failed");
+          }
+        },
+        theme: {
+          color: "#4da3ff"
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      setError(
+        err.response?.data?.detail ||
+          "Unable to start payment"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // -------------------------
+  // UI
+  // -------------------------
+  return (
+    <div className="plans-page">
+      <h2 style={{ marginBottom: 16 }}>Upgrade Plan</h2>
+
+      {error && (
+        <div style={{ color: "#ff4d4d", marginBottom: 12 }}>
+          {error}
+        </div>
+      )}
+
+      {plans.map((plan) => (
+        <div key={plan.plan_code} className="plan-card">
+          <h3>{plan.plan_code.replace("_", " ").toUpperCase()}</h3>
+
+          <div className="plan-price">
+            ₹{plan.price}
+            {plan.duration_days
+              ? ` / ${plan.duration_days} days`
+              : ""}
+          </div>
+
+          <ul>
+            {plan.features.map((f, i) => (
+              <li key={i}>✔ {f}</li>
+            ))}
+          </ul>
+
+          {currentPlan === plan.plan_code ? (
+            <button disabled style={{ background: "#444" }}>
+              Current Plan
+            </button>
+          ) : plan.price === 0 ? (
+            <button disabled style={{ background: "#444" }}>
+              Free Plan
+            </button>
+          ) : (
+            <button
+              onClick={() => buyPlan(plan.plan_code)}
+              disabled={loading}
+            >
+              {loading ? "Please wait..." : "Buy Now"}
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Plans;
