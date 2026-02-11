@@ -1,0 +1,111 @@
+import React, { useEffect, useState } from "react";
+import { getHistory, clearHistory } from "../api";
+
+const History = () => {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // -------------------------
+  // LOAD HISTORY
+  // -------------------------
+  const loadHistory = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await getHistory(50, 0);
+      setItems(res.data.history || []);
+    } catch (err) {
+      setError(
+        err.response?.data?.detail ||
+          "Failed to load history"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadHistory();
+  }, []);
+
+  // -------------------------
+  // CLEAR HISTORY
+  // -------------------------
+  const handleClearHistory = async () => {
+    if (!window.confirm("Clear all history?")) return;
+
+    try {
+      await clearHistory();
+      setItems([]);
+    } catch (err) {
+      setError("Failed to clear history");
+    }
+  };
+
+  // -------------------------
+  // UI
+  // -------------------------
+  return (
+    <div className="history-page">
+      <h2 style={{ marginBottom: 16 }}>History</h2>
+
+      {error && (
+        <div style={{ color: "#ff4d4d", marginBottom: 12 }}>
+          {error}
+        </div>
+      )}
+
+      {loading && <div className="loader">Loading...</div>}
+
+      {!loading && items.length === 0 && (
+        <div style={{ color: "#aaa" }}>
+          No history found
+        </div>
+      )}
+
+      {items.map((item) => (
+        <div key={item.id} className="history-item">
+          <small>
+            {new Date(item.created_at).toLocaleString()} |{" "}
+            <strong>{item.mode}</strong>
+          </small>
+
+          <p style={{ marginTop: 6 }}>
+            <strong>Q:</strong> {item.question}
+          </p>
+
+          <pre
+            style={{
+              marginTop: 6,
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              color: "#ccc"
+            }}
+          >
+            {JSON.stringify(item.response, null, 2)}
+          </pre>
+        </div>
+      ))}
+
+      {items.length > 0 && (
+        <button
+          onClick={handleClearHistory}
+          style={{
+            marginTop: 20,
+            padding: "10px 14px",
+            borderRadius: 8,
+            background: "#ff4d4d",
+            color: "#fff",
+            fontWeight: 600
+          }}
+        >
+          Clear History
+        </button>
+      )}
+    </div>
+  );
+};
+
+export default History;
