@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+
+    <!-- Mobile Responsive -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <!-- Theme -->
+    <meta name="theme-color" content="#000000" />
+
+    <!-- SEO -->
+    <meta
+      name="description"
+      content="BlackBrain – Logical problem solving, decision making and smart thinking app."
+    />
+    <meta name="keywords" content="BlackBrain, AI brain, problem solving, decision making" />
+    <meta name="author" content="BlackBrain" />
+
+    <!-- App Title -->
+    <title>BlackBrain</title>
+
+    <!-- Fonts (optional, clean system font fallback works too) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body style="margin:0; background:#000; color:#fff;">
+    <!-- React Root -->
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+
+    <!--
+      This HTML file is a template.
+      React will inject the app inside #root.
+    -->
+  </body>
+</html>
