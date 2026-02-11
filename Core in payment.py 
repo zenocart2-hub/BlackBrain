@@ -1,0 +1,146 @@
+"""
+BlackBrain Payment Module (Razorpay)
+-----------------------------------
+Handles:
+- Order creation
+- Payment verification
+- Subscription activation
+"""
+
+import razorpay
+from datetime import datetime, timedelta
+from fastapi import HTTPException, status
+from bson import ObjectId
+
+from core.config import (
+    RAZORPAY_KEY_ID,
+    RAZORPAY_KEY_SECRET,
+    SUBSCRIPTION_PLANS
+)
+from db.mongo import users
+
+# ----------------------------------------
+# RAZORPAY CLIENT
+# ----------------------------------------
+razorpay_client = razorpay.Client(
+    auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)
+)
+
+# ----------------------------------------
+# CREATE PAYMENT ORDER
+# ----------------------------------------
+def create_payment_order(plan_code: str, user_id: str) -> dict:
+    """
+    Creates Razorpay order for selected plan
+    """
+
+    plan = SUBSCRIPTION_PLANS.get(plan_code)
+    if not plan:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid subscription plan"
+        )
+
+    amount = plan["price"] * 100  # Razorpay uses paise
+
+    if amount <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Free plan does not require payment"
+        )
+
+    try:
+        order = razorpay_client.order.create({
+            "amount": amount,
+            "currency": "INR",
+            "receipt": f"blackbrain_{user_id}_{plan_code}",
+            "payment_capture": 1
+        })
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+    return {
+        "order_id": order["id"],
+        "amount": amount,
+        "currency": "INR",
+        "plan": plan_code,
+        "razorpay_key": RAZORPAY_KEY_ID
+    }
+
+# ----------------------------------------
+# VERIFY PAYMENT & ACTIVATE PLAN
+# ----------------------------------------
+async def verify_and_activate_payment(
+    user_id: str,
+    plan_code: str,
+    razorpay_payment_id: str,
+    razorpay_order_id: str,
+    razorpay_signature: str
+):
+    """
+    Verifies Razorpay payment signature and activates subscription
+    """
+
+    try:
+        razorpay_client.utility.verify_payment_signature({
+            "razorpay_payment_id": razorpay_payment_id,
+            "razorpay_order_id": razorpay_order_id,
+            "razorpay_signature": razorpay_signature
+        })
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Payment verification failed"
+        )
+
+    plan = SUBSCRIPTION_PLANS.get(plan_code)
+    if not plan:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid plan"
+        )
+
+    duration_days = plan.get("duration_days", 30)
+    expiry_date = datetime.utcnow() + timedelta(days=duration_days)
+
+    await users.update_one(
+        {"_id": ObjectId(user_id)},
+        {
+            "$set": {
+                "plan": plan_code,
+                "plan_expiry": expiry_date,
+                "payment_status": "paid",
+                "updated_at": datetime.utcnow()
+            }
+        }
+    )
+
+    return {
+        "message": "Payment successful & plan activated",
+        "plan": plan_code,
+        "valid_till": expiry_date.isoformat()
+    }
+
+# ----------------------------------------
+# AUTO EXPIRE PLANS (OPTIONAL UTILITY)
+# ----------------------------------------
+async def expire_user_plan(user_id: str):
+    """
+    Downgrades user to free plan after expiry
+    """
+
+    await users.update_one(
+        {"_id": ObjectId(user_id)},
+        {
+            "$set": {
+                "plan": "free",
+                "payment_status": "expired",
+                "updated_at": datetime.utcnow()
+            }
+        }
+    )
+
+    return {"message": "Subscription expired, switched to free plan"}
