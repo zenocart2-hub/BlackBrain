@@ -1,0 +1,292 @@
+/* =================================================
+   GLOBAL RESET & THEME
+================================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #000;
+  color: #fff;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+/* =================================================
+   APP CONTAINER
+================================================= */
+.app-container {
+  min-height: 100vh;
+  background: #000;
+  padding-top: 60px;
+}
+
+/* =================================================
+   HEADER
+================================================= */
+.brain-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 56px;
+  background: #111;
+  border-bottom: 1px solid #222;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  z-index: 1000;
+}
+
+.brain-header h1 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.brain-header nav a {
+  margin-left: 14px;
+  font-size: 14px;
+  color: #aaa;
+}
+
+.brain-header nav a.active {
+  color: #4da3ff;
+}
+
+/* =================================================
+   AUTH (LOGIN / SIGNUP)
+================================================= */
+.auth-page {
+  min-height: 100vh;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-box {
+  width: 90%;
+  max-width: 360px;
+  background: #111;
+  padding: 22px;
+  border-radius: 14px;
+}
+
+.auth-box h2 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.auth-box input {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: #1c1c1c;
+  color: #fff;
+}
+
+.auth-box button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #4da3ff;
+  color: #fff;
+  font-weight: 600;
+}
+
+.auth-switch {
+  margin-top: 14px;
+  text-align: center;
+  color: #4da3ff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* =================================================
+   CHAT PAGE
+================================================= */
+.chat-page {
+  padding: 16px;
+}
+
+.chat-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 80px;
+}
+
+.chat-bubble {
+  max-width: 85%;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.chat-user {
+  align-self: flex-end;
+  background: #4da3ff;
+  color: #000;
+  border-bottom-right-radius: 4px;
+}
+
+.chat-brain {
+  align-self: flex-start;
+  background: #1a1a1a;
+  border-bottom-left-radius: 4px;
+}
+
+.chat-input-box {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #111;
+  border-top: 1px solid #222;
+  display: flex;
+  padding: 10px;
+}
+
+.chat-input-box input {
+  flex: 1;
+  background: #1c1c1c;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 14px;
+  color: #fff;
+}
+
+.chat-input-box button {
+  margin-left: 10px;
+  padding: 10px 16px;
+  border-radius: 20px;
+  background: #4da3ff;
+  color: #000;
+  font-weight: 600;
+}
+
+/* =================================================
+   PLANS PAGE
+================================================= */
+.plans-page {
+  padding: 16px;
+}
+
+.plan-card {
+  background: #111;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 16px;
+  border: 1px solid #222;
+}
+
+.plan-card h3 {
+  margin-bottom: 6px;
+}
+
+.plan-price {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 10px 0;
+}
+
+.plan-card ul {
+  margin-top: 8px;
+  margin-bottom: 14px;
+}
+
+.plan-card li {
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 6px;
+}
+
+.plan-card button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: #4da3ff;
+  color: #000;
+  font-weight: 600;
+}
+
+/* =================================================
+   HISTORY PAGE
+================================================= */
+.history-page {
+  padding: 16px;
+}
+
+.history-item {
+  background: #111;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.history-item small {
+  color: #aaa;
+  font-size: 12px;
+}
+
+/* =================================================
+   PROFILE PAGE
+================================================= */
+.profile-page {
+  padding: 16px;
+  text-align: center;
+}
+
+.profile-page h2 {
+  margin-bottom: 8px;
+}
+
+.profile-page p {
+  font-size: 14px;
+  color: #ccc;
+}
+
+.profile-page button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: #ff4d4d;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* =================================================
+   LOADER
+================================================= */
+.loader {
+  text-align: center;
+  padding: 20px;
+  color: #aaa;
+}
+
+/* =================================================
+   RESPONSIVE
+================================================= */
+@media (min-width: 768px) {
+  .chat-bubble {
+    max-width: 60%;
+  }
+}
