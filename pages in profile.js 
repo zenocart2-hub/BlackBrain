@@ -1,0 +1,73 @@
+import React, { useEffect, useState } from "react";
+import { getMyProfile, logout } from "../api";
+
+const Profile = () => {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // -------------------------
+  // LOAD PROFILE
+  // -------------------------
+  const loadProfile = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await getMyProfile();
+      setProfile(res.data);
+    } catch (err) {
+      setError(
+        err.response?.data?.detail || "Failed to load profile"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  // -------------------------
+  // UI
+  // -------------------------
+  return (
+    <div className="profile-page">
+      <h2>My Profile</h2>
+
+      {loading && <div className="loader">Loading...</div>}
+
+      {error && (
+        <div style={{ color: "#ff4d4d", marginTop: 10 }}>
+          {error}
+        </div>
+      )}
+
+      {profile && (
+        <>
+          <p style={{ marginTop: 10 }}>
+            <strong>Email:</strong> {profile.email}
+          </p>
+
+          <p>
+            <strong>Plan:</strong>{" "}
+            {profile.plan ? profile.plan.toUpperCase() : "FREE"}
+          </p>
+
+          {profile.plan_expiry && (
+            <p>
+              <strong>Valid Till:</strong>{" "}
+              {new Date(profile.plan_expiry).toLocaleDateString()}
+            </p>
+          )}
+
+          <button onClick={logout}>
+            Logout
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default Profile;
